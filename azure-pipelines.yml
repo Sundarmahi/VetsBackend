@@ -1,0 +1,31 @@
+# Maven
+# Build your Java project and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+
+trigger:
+- dev
+
+pool:
+  vmImage: ubuntu-20.04
+container: maven:3.8.1-openjdk-17-slim
+variables:
+  - name: JAVA_HOME_11_X64
+    value: /usr/local/openjdk-17
+
+steps:
+- task: Maven@4
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOptions: '-Xmx3072m'
+    javaHomeSelection: 'path'
+    jdkDirectory: '/usr/local/openjdk-17'
+    jdkVersionOption: '1.8'
+    jdkArchitectureOption: 'x64'
+    goals: 'package'
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Dockerhub_Auth'
+    repository: 'skillassure/btvetservice2024'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
